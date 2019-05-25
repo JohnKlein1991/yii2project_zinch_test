@@ -1,3 +1,2 @@
 <?php
-asgasgasfd
-git asdfasfdas
+echo 'master';
