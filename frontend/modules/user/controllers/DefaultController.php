@@ -202,4 +202,11 @@ class  DefaultController extends Controller
             'model' => $model
         ]);
     }
+    public function actionRedis()
+    {
+        $redis = Yii::$app->redis;
+        $result = $redis->executeCommand('get', ['test1']);
+        //$result = $redis->get('test1');
+        var_dump($result);
+    }
 }

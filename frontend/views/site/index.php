@@ -27,7 +27,7 @@ $this->title = 'My Yii Application';
                 foreach ($users as $user){
                     $url = Url::toRoute([
                         '/user/profile/view',
-                        'id' => $user->id
+                        'nickname' => $user->getNickname()
                     ]);
                     echo Html::tag(
                             'a',

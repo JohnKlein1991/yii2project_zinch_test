@@ -21,6 +21,10 @@ use yii\web\IdentityInterface;
  * @property integer $created_at
  * @property integer $updated_at
  * @property string $password write-only password
+ * @property string $about
+ * @property integer $type
+ * @property string $nickname
+ * @property string $picture
  */
 class User extends ActiveRecord implements IdentityInterface
 {
@@ -205,5 +209,59 @@ class User extends ActiveRecord implements IdentityInterface
     public function removePasswordResetToken()
     {
         $this->password_reset_token = null;
+    }
+    public function getNickname()
+    {
+        return ($this->nickname)  ? $this->nickname : $this->id;
+    }
+    /* @param $user User */
+    public function followUser(User  $user)
+    {
+        $key1 = 'user:'.($this->getId()).':subscriptions';
+        $key2 = 'user:'.($user->getId()).':followers';
+        $value1 = $user->getId();
+        $value2 = $this->getId();
+        $redis = Yii::$app->redis;
+        $redis->sadd($key1, $value1);
+        $redis->sadd($key2, $value2);
+    }
+    /* @param $user User */
+    public function unfollowUser(User  $user)
+    {
+        $key1 = 'user:'.($this->getId()).':subscriptions';
+        $key2 = 'user:'.($user->getId()).':followers';
+        $value1 = $user->getId();
+        $value2 = $this->getId();
+        $redis = Yii::$app->redis;
+        $redis->srem($key1, $value1);
+        $redis->srem($key2, $value2);
+    }
+    public function getSubscribers()
+    {
+        $redis = Yii::$app->redis;
+        $id = $this->getId();
+        $key = 'user:'.$id.':subscriptions';
+        $ids = $redis->smembers($key);
+        $result = User::find()
+            ->select('id, username, nickname')
+            ->where(['id' => $ids]
+            )->orderBy('username')
+            ->asArray()
+            ->all();
+        return $result;
+    }
+    public function getFollowers()
+    {
+        $redis = Yii::$app->redis;
+        $id = $this->getId();
+        $key = 'user:'.$id.':followers';
+        $ids = $redis->smembers($key);
+        $result = User::find()
+            ->select('id, username, nickname')
+            ->where(['id' => $ids]
+            )->orderBy('username')
+            ->asArray()
+            ->all();
+        return $result;
     }
 }
