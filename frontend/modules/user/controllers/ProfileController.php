@@ -12,9 +12,13 @@ class ProfileController extends Controller
 {
     public function actionView($nickname)
     {
+        $currentUser = Yii::$app->user->identity;
          return $this->render(
              'view',
-             ['user' => $this->findUser($nickname)]
+             [
+                 'user' => $this->findUser($nickname),
+                 'currentUser' => $currentUser
+             ]
          );
     }
     public function actionSubscribe($id)

@@ -264,4 +264,26 @@ class User extends ActiveRecord implements IdentityInterface
             ->all();
         return $result;
     }
+    public function countOfFollowers()
+    {
+        $redis = Yii::$app->redis;
+        $id = $this->getId();
+        $key = 'user:'.$id.':followers';
+        return $redis->scard($key);
+    }
+    public function countOfSubscribers()
+    {
+        $redis = Yii::$app->redis;
+        $id = $this->getId();
+        $key = 'user:'.$id.':subscriptions';
+        return $redis->scard($key);
+    }
+    public function getCommonFollowers(User $user)
+    {
+        $redis = Yii::$app->redis;
+        $key1 = 'user:'.$this->getId().':followers';
+        $key2 = 'user:'.$user->getId().':subscriptions';
+        $ids = $redis->sinter($key1, $key2);
+        return User::find()->select('id, username, nickname')->where(['id' => $ids])->asArray()->all();
+    }
 }
