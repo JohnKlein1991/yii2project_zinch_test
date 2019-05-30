@@ -1,10 +1,14 @@
 <?php
 /* @var $user \frontend\models\User */
 /* @var $currentUser \frontend\models\User */
+/* @var $pictureModel \frontend\modules\user\models\forms\PictureForm */
+
 use yii\helpers\Url;
 use yii\helpers\HtmlPurifier;
 use yii\helpers\Html;
 use frontend\models\User;
+use dosamigos\fileupload\FileUpload;
+use dosamigos\fileupload\FileUploadUI;
 
 echo Html::tag('h4', 'Hello! It\'s the page of ' . Html::encode($user->nickname));
 echo Html::tag('p', Html::encode('Name: ' . $user->username));
@@ -12,6 +16,50 @@ echo Html::tag('p', HtmlPurifier::process('About: ' . $user->about));
 ?>
 <hr>
 <div class="">
+<?= FileUpload::widget([
+    'model' => $pictureModel,
+    'attribute' => 'picture',
+    'url' => ['/', 'id' => '1'], // your url, this is just for demo purposes,
+    'options' => ['accept' => 'image/*'],
+    'clientOptions' => [
+        'maxFileSize' => 2000000
+    ],
+    // Also, you can specify jQuery-File-Upload events
+    // see: https://github.com/blueimp/jQuery-File-Upload/wiki/Options#processing-callback-options
+    'clientEvents' => [
+        'fileuploaddone' => 'function(e, data) {
+                            console.log(e);
+                            console.log(data);
+                        }',
+        'fileuploadfail' => 'function(e, data) {
+                            console.log(e);
+                            console.log(data);
+                        }',
+    ],
+]); ?>
+<?= FileUploadUI::widget([
+    'model' => $pictureModel,
+    'attribute' => 'picture',
+    'url' => ['media/upload', 'id' => '1'],
+    'gallery' => false,
+    'fieldOptions' => [
+        'accept' => 'image/*'
+    ],
+    'clientOptions' => [
+        'maxFileSize' => 2000000
+    ],
+    // ...
+    'clientEvents' => [
+        'fileuploaddone' => 'function(e, data) {
+                            console.log(e);
+                            console.log(data);
+                        }',
+        'fileuploadfail' => 'function(e, data) {
+                            console.log(e);
+                            console.log(data);
+                        }',
+    ],
+]); ?>
 
 <!-- Button trigger followers modal -->
 <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#followersModal">

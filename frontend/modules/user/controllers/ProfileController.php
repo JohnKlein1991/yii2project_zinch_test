@@ -7,19 +7,26 @@ use Yii;
 use yii\web\Controller;
 use frontend\models\User;
 use Faker;
+use frontend\modules\user\models\forms\PictureForm;
 
 class ProfileController extends Controller
 {
     public function actionView($nickname)
     {
+        $pictureModel = new PictureForm();
         $currentUser = Yii::$app->user->identity;
-         return $this->render(
-             'view',
-             [
-                 'user' => $this->findUser($nickname),
-                 'currentUser' => $currentUser
-             ]
-         );
+        if($currentUser){
+            return $this->render(
+                'view',
+                [
+                    'user' => $this->findUser($nickname),
+                    'currentUser' => $currentUser,
+                    'pictureModel' => $pictureModel
+                ]
+            );
+        } else {
+            return $this->redirect(['/user/default/login']);
+        }
     }
     public function actionSubscribe($id)
     {
