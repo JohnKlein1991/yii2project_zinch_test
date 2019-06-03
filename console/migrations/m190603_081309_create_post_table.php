@@ -12,8 +12,7 @@ class m190603_081309_create_post_table extends Migration
      */
     public function safeUp()
     {
-        yii\db\ActiveRecord::tableName();
-        $this->createTable('{{%post}}', [
+        $this->createTable('post', [
             'id' => $this->primaryKey(),
             'user_id' => $this->integer()->notNull(),
             'filename' => $this->string()->notNull(),
@@ -27,6 +26,6 @@ class m190603_081309_create_post_table extends Migration
      */
     public function safeDown()
     {
-        $this->dropTable('{{%post}}');
+        $this->dropTable('post');
     }
 }
