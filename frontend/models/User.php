@@ -31,6 +31,7 @@ class User extends ActiveRecord implements IdentityInterface
     const STATUS_DELETED = 0;
     const STATUS_INACTIVE = 9;
     const STATUS_ACTIVE = 10;
+    const DEFAULT_IMAGE = '/img/profile_default_image.png';
 
 
     /**
@@ -258,8 +259,8 @@ class User extends ActiveRecord implements IdentityInterface
         $ids = $redis->smembers($key);
         $result = User::find()
             ->select('id, username, nickname')
-            ->where(['id' => $ids]
-            )->orderBy('username')
+            ->where(['id' => $ids])
+            ->orderBy('username')
             ->asArray()
             ->all();
         return $result;
@@ -285,5 +286,12 @@ class User extends ActiveRecord implements IdentityInterface
         $key2 = 'user:'.$user->getId().':subscriptions';
         $ids = $redis->sinter($key1, $key2);
         return User::find()->select('id, username, nickname')->where(['id' => $ids])->asArray()->all();
+    }
+    public function getPictures()
+    {
+        if($this->picture){
+            return Yii::$app->storage->getFile($this->picture );
+        }
+        return self::DEFAULT_IMAGE;
     }
 }

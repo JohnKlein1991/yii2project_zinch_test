@@ -8,6 +8,8 @@ use yii\web\Controller;
 use frontend\models\User;
 use Faker;
 use frontend\modules\user\models\forms\PictureForm;
+use yii\web\UploadedFile;
+use yii\web\Response;
 
 class ProfileController extends Controller
 {
@@ -56,6 +58,28 @@ class ProfileController extends Controller
             'nickname' => $user->getNickname()
         ]);
     }
+    public function actionUploadPicture()
+    {
+        Yii::$app->response->format = Response::FORMAT_JSON;
+        $model = new PictureForm();
+        $model->picture = UploadedFile::getInstance($model, 'picture');
+        if($model->validate()){
+            $user = Yii::$app->user->identity;
+            $user->picture = Yii::$app->storage ->saveUploadedFile($model->picture);
+            if($user->save(false, ['picture'])){
+                return [
+                    'success' => true,
+                    'pictureUri' => Yii::$app->storage->getFile($user->picture)
+                ];
+            }
+        }
+        return [
+          'success' => false,
+          'errors' => $model->getErrors( )
+        ];
+
+    }
+
     private function findUser($nickname)
     {
         $user = User::find()->where(['nickname' => $nickname])->orWhere(['id' => $nickname])->one();

@@ -12,7 +12,7 @@ class PictureForm extends Model
     {
         return [
             [['picture'], 'file',
-                'extension' => 'jpg',
+                'extensions' => 'jpg',
                 'checkExtensionByMimeType' => true
              ]
         ];

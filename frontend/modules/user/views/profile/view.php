@@ -10,57 +10,60 @@ use frontend\models\User;
 use dosamigos\fileupload\FileUpload;
 use dosamigos\fileupload\FileUploadUI;
 
-echo Html::tag('h4', 'Hello! It\'s the page of ' . Html::encode($user->nickname));
-echo Html::tag('p', Html::encode('Name: ' . $user->username));
-echo Html::tag('p', HtmlPurifier::process('About: ' . $user->about));
+if($user->picture){
+    echo Html::tag('img','',[
+        'src' => Yii::$app->storage->getFile($user->picture),
+        'class' => 'profile_image',
+    ]);
+} else {
+    echo Html::tag('img','',[
+        'src' => $user::DEFAULT_IMAGE
+    ]);
+}
 ?>
+<div class="alert alert-success" id="image_info__success" style="display: none">The profile image updated successfully!</div>
+<div class="alert alert-danger" id="image_info__error" style="display: none"></div>
+<h4>Hello! It's the page of <?= Html::encode($user->nickname)?></h4>
+<p><?= Html::encode('Name: ' . $user->username)?></p>
+<p><?= HtmlPurifier::process('About: ' . $user->about)?></p>
 <hr>
 <div class="">
-<?= FileUpload::widget([
-    'model' => $pictureModel,
-    'attribute' => 'picture',
-    'url' => ['/', 'id' => '1'], // your url, this is just for demo purposes,
-    'options' => ['accept' => 'image/*'],
-    'clientOptions' => [
-        'maxFileSize' => 2000000
-    ],
-    // Also, you can specify jQuery-File-Upload events
-    // see: https://github.com/blueimp/jQuery-File-Upload/wiki/Options#processing-callback-options
-    'clientEvents' => [
-        'fileuploaddone' => 'function(e, data) {
+<?php
+if($currentUser && $currentUser->equals($user)){
+    echo FileUpload::widget([
+        'model' => $pictureModel,
+        'attribute' => 'picture',
+        'url' => ['/user/profile/upload-picture'], // your url, this is just for demo purposes,
+        'options' => ['accept' => 'image/*'],
+        'clientOptions' => [
+            'maxFileSize' => 2000000
+        ],
+        // Also, you can specify jQuery-File-Upload events
+        // see: https://github.com/blueimp/jQuery-File-Upload/wiki/Options#processing-callback-options
+        'clientEvents' => [
+            'fileuploaddone' => 'function(e, data) {  
+            console.log(data.result);     
+            if(data.result.success){
+                $(\'#image_info__error\').hide();
+                $(\'.profile_image\').attr(\'src\', data.result.pictureUri);
+                $(\'#image_info__success\').show();	
+            } else {
+                if(data.result.errors){
+                    $(\'#image_info__success\').hide();
+                    $(\'#image_info__error\').html(data.result.errors .picture);
+                    $(\'#image_info__error\').show();
+                }
+            }
+                        }',
+            'fileuploadfail' => 'function(e, data) {
                             console.log(e);
                             console.log(data);
                         }',
-        'fileuploadfail' => 'function(e, data) {
-                            console.log(e);
-                            console.log(data);
-                        }',
-    ],
-]); ?>
-<?= FileUploadUI::widget([
-    'model' => $pictureModel,
-    'attribute' => 'picture',
-    'url' => ['media/upload', 'id' => '1'],
-    'gallery' => false,
-    'fieldOptions' => [
-        'accept' => 'image/*'
-    ],
-    'clientOptions' => [
-        'maxFileSize' => 2000000
-    ],
-    // ...
-    'clientEvents' => [
-        'fileuploaddone' => 'function(e, data) {
-                            console.log(e);
-                            console.log(data);
-                        }',
-        'fileuploadfail' => 'function(e, data) {
-                            console.log(e);
-                            console.log(data);
-                        }',
-    ],
-]); ?>
-
+        ],
+    ]);
+}
+?>
+<hr>
 <!-- Button trigger followers modal -->
 <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#followersModal">
     Show followers(<?=$user->countOfFollowers()?>)
@@ -141,12 +144,16 @@ foreach ($user->getCommonFollowers($currentUser) as $person) {
     ])?>" class="btn btn-info"><?=$person['username']?></a>
 <?php
 }
+if(!$currentUser->equals($user)) :
 ?>
 <hr>
 <div class="">
     <a href="<?=Url::toRoute(['/user/profile/subscribe', 'id' => $user->getId()])?>" class="btn btn-info">Subscribe</a>
     <a href="<?=Url::toRoute(['/user/profile/unsubscribe', 'id' => $user->getId()])?>" class="btn btn-info">Unsubscribe</a>
 </div>
+<?php
+endif;
+?>
 <hr>
 <div>
     <a href="<?=Url::home()?>" class="btn btn-primary btn-lg">Go back</a>
