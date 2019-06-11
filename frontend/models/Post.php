@@ -35,4 +35,14 @@ class Post extends \yii\db\ActiveRecord
             'created_at' => 'Created At',
         ];
     }
+    public function getImage($name)
+    {
+        return Yii::$app->storage->getFile($name);
+    }
+    public function getUser()
+    {
+        return $this->hasOne(User::className(), [
+            'id' => 'user_id'
+        ]);
+    }
 }

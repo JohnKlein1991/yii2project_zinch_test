@@ -75,7 +75,7 @@ class ProfileController extends Controller
         }
         return [
           'success' => false,
-          'errors' => $model->getErrors( )
+          'errors' => $model->getErrors()
         ];
 
     }
