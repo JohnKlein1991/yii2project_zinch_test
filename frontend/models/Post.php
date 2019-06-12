@@ -45,4 +45,28 @@ class Post extends \yii\db\ActiveRecord
             'id' => 'user_id'
         ]);
     }
+    public function like($user)
+    {
+        $redis = Yii::$app->redis;
+        $redis->sadd('post:'.$this->id.':like', $user->id);
+        $redis->sadd('user:'.$user->id.':like', $this->id);
+        return $this->likesCount();
+    }
+    public function dislike($user)
+    {
+        $redis = Yii::$app->redis;
+        $redis->srem('post:'.$this->id.':like', $user->id);
+        $redis->srem('user:'.$user->id.':like', $this->id);
+        return $this->likesCount();
+    }
+    public function likesCount()
+    {
+        $redis = Yii::$app->redis;
+        return $redis->scard('post:'.$this->id.':like');
+    }
+    public function isLikedByUser($user)
+    {
+        $redis = Yii::$app->redis;
+        return $redis->sismember('post:'.$this->id.':like', $user->id);
+    }
 }
